@@ -32,6 +32,8 @@ def test_lootex_events_with_time_range():
     start_time = parse_input_time(start_time_str)
     end_time = parse_input_time(end_time_str)
 
+    filtered_events = client.get_filtered_events(chain_id, contract_address, token_id, start_time, end_time)
+
     if start_time is None or end_time is None:
         filtered_events = client.get_nft_events(chain_id, contract_address, token_id)
     else:
@@ -99,38 +101,50 @@ def format_sale_event(event):
         'quantity': int(event.get('amount', 0))
     }
 
-def get_lootex_events(chain_id, contract_address, token_id, limit=30):
-    client = LootexClient()
-    all_events = []
-    page = 1
-    while True:
-        response = client.get_nft_events(chain_id, contract_address, token_id, limit=limit, page=page)
-        if response and 'ordersHistory' in response:
-            events = response['ordersHistory']
-            all_events.extend(events)
-            if len(events) < limit:
-                break
-            page += 1
-        else:
-            break
-    # print("Raw API response:")
-    # print(json.dumps(response, indent=2))
-    return all_events
+# def get_lootex_events(chain_id, contract_address, token_id, limit=30):
+#     client = LootexClient()
+#     all_events = []
+#     page = 1
+#     while True:
+#         response = client.get_nft_events(chain_id, contract_address, token_id, limit=limit, page=page)
+#         if response and 'ordersHistory' in response:
+#             events = response['ordersHistory']
+#             all_events.extend(events)
+#             if len(events) < limit:
+#                 break
+#             page += 1
+#         else:
+#             break
+#     # print("Raw API response:")
+#     # print(json.dumps(response, indent=2))
+#     return all_events
 
-def get_lootex_listing_events(chain_id, contract_address, token_id, start_time=None, end_time=None):
+def get_lootex_events(chain_id, contract_address, token_id, limit=30, start_time=None, end_time=None):
     client = LootexClient()
+    return client.get_nft_events(chain_id, contract_address, token_id, limit=limit, start_time=start_time, end_time=end_time)
+
+
+def get_lootex_listing_events(chain_id, contract_address, token_id, start_time_str=None, end_time_str=None):
+    client = LootexClient()
+    start_time = parse_input_time(start_time_str)
+    end_time = parse_input_time(end_time_str)
     events = client.get_filtered_events(chain_id, contract_address, token_id, start_time, end_time)
     return [format_listing_event(event) for event in events if event['category'] == 'list']
 
-def get_lootex_cancel_events(chain_id, contract_address, token_id, start_time=None, end_time=None):
+def get_lootex_cancel_events(chain_id, contract_address, token_id, start_time_str=None, end_time_str=None):
     client = LootexClient()
+    start_time = parse_input_time(start_time_str)
+    end_time = parse_input_time(end_time_str)
     events = client.get_filtered_events(chain_id, contract_address, token_id, start_time, end_time)
     return [format_cancel_event(event) for event in events if event['category'] == 'cancel']
 
-def get_lootex_sale_events(chain_id, contract_address, token_id, start_time=None, end_time=None):
+def get_lootex_sale_events(chain_id, contract_address, token_id, start_time_str=None, end_time_str=None):
     client = LootexClient()
+    start_time = parse_input_time(start_time_str)
+    end_time = parse_input_time(end_time_str)
     events = client.get_filtered_events(chain_id, contract_address, token_id, start_time, end_time)
     return [format_sale_event(event) for event in events if event['category'] == 'sale']
+
 def print_events(events, event_type):
     print(f"\n--- {event_type.capitalize()} Events ---")
     print(f"Total {event_type} events: {len(events)}")

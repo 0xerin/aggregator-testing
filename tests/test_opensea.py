@@ -85,15 +85,21 @@ def get_opensea_events(chain, contract_address, token_id, event_types, after=Non
                                    event_types=event_types, after=after, before=before)
     return events.get('asset_events', [])
 
-def get_opensea_listing_events(chain, contract_address, token_id, after=None, before=None):
+def get_opensea_listing_events(chain, contract_address, token_id, start_time_str=None, end_time_str=None):
+    after = parse_input_time(start_time_str)
+    before = parse_input_time(end_time_str)
     events = get_opensea_events(chain, contract_address, token_id, ["listing"], after, before)
     return [format_listing_event(event) for event in events if event['event_type'] == 'order']
 
-def get_opensea_sale_events(chain, contract_address, token_id, after=None, before=None):
+def get_opensea_sale_events(chain, contract_address, token_id, start_time_str=None, end_time_str=None):
+    after = parse_input_time(start_time_str)
+    before = parse_input_time(end_time_str)
     events = get_opensea_events(chain, contract_address, token_id, "transfer", after, before)
     return [event for event in (format_sale_event(event) for event in events) if event is not None]
 
-def get_opensea_cancel_events(chain, contract_address, token_id, after=None, before=None):
+def get_opensea_cancel_events(chain, contract_address, token_id, start_time_str=None, end_time_str=None):
+    after = parse_input_time(start_time_str)
+    before = parse_input_time(end_time_str)
     events = get_opensea_events(chain, contract_address, token_id, "cancel", after, before)
     return [event for event in (format_cancel_event(event) for event in events) if event is not None]
 

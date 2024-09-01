@@ -29,20 +29,20 @@ CHAIN_ID_MAP = {
     "base": "8453"
 }
 
-def parse_input_time(time_str):
-    if time_str:
-        return datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
-    return None
+# def parse_input_time(time_str):
+#     if time_str:
+#         return datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+#     return None
 
-def to_iso_format(dt):
-    if dt:
-        return dt.strftime("%Y-%m-%dT%H:%M:%S.000Z")
-    return None
+# def to_iso_format(dt):
+#     if dt:
+#         return dt.strftime("%Y-%m-%dT%H:%M:%S.000Z")
+#     return None
 
-def to_unix_timestamp(dt):
-    if dt:
-        return int(dt.timestamp())
-    return None
+# def to_unix_timestamp(dt):
+#     if dt:
+#         return int(dt.timestamp())
+#     return None
 
 def get_chain_info(chain_input):
     chain_input = str(chain_input).lower()
@@ -96,23 +96,14 @@ def main():
     chain_input, contract_address, token_id, start_time_str, end_time_str = get_user_input()
     chain_id, opensea_chain = get_chain_info(chain_input)
 
-    start_time = parse_input_time(start_time_str)
-    end_time = parse_input_time(end_time_str)
-
-    lootex_start_time = to_iso_format(start_time)
-    lootex_end_time = to_iso_format(end_time)
-
-    opensea_start_time = to_unix_timestamp(start_time)
-    opensea_end_time = to_unix_timestamp(end_time)
-
     event_types = ['listing', 'cancel', 'sale']
     
     for event_type in event_types:
         lootex_func = globals()[f'get_lootex_{event_type}_events']
         opensea_func = globals()[f'get_opensea_{event_type}_events']
 
-        lootex_events = lootex_func(chain_id, contract_address, token_id, lootex_start_time, lootex_end_time)
-        opensea_events = opensea_func(opensea_chain, contract_address, token_id, opensea_start_time, opensea_end_time)
+        lootex_events = lootex_func(chain_id, contract_address, token_id, start_time_str, end_time_str)
+        opensea_events = opensea_func(opensea_chain, contract_address, token_id, start_time_str, end_time_str)
 
         compare_events(lootex_events, opensea_events, event_type)
 
